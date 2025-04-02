@@ -1,6 +1,6 @@
 <script setup>
 import { RouterView } from 'vue-router'
-import zhCn from "element-plus/es/locale/lang/zh-cn" // Element Plus 中文包
+import zhCn from "element-plus/es/locale/lang/zh-cn"
 </script>
 
 <template>

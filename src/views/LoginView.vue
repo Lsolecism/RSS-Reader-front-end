@@ -1,22 +1,32 @@
 <template>
-  <div class="justify-center">
-    <!-- 使用 flex 布局来控制 Owl 和 el-tabs 的位置 -->
-    <div class="login-wrapper">
-      <!-- Owl 组件 -->
-      <Owl :close-eyes="isFocus" class="owl-container"/>
-      <!-- 登录表单容器 -->
-      <div class="login-container">
-        <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
-          <el-tab-pane label="Login" name="first">
-            <login-form @focus="handleFocus" @blur="handleBlur" />
-          </el-tab-pane>
-          <el-tab-pane label="Register" name="second">
-            <register-form @focus="handleFocus" @blur="handleBlur" />
-          </el-tab-pane>
-        </el-tabs>
-      </div>
-    </div>
+  <div class="common-layout">
+    <el-container>
+      <el-header>小哆啦阅读器demo</el-header>
+        <el-main>
+          <div class="justify-center">
+          <div class="login-wrapper">
+            <!-- Owl 组件 -->
+            <Owl :close-eyes="isFocus" class="owl-container"/>
+            <!-- 登录表单容器 -->
+            <div class="login-container">
+              <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
+                <el-tab-pane label="Login" name="first">
+                  <login-form @focus="handleFocus" @blur="handleBlur" />
+                </el-tab-pane>
+                <el-tab-pane label="Register" name="second">
+                  <register-form @focus="handleFocus" @blur="handleBlur" />
+                </el-tab-pane>
+              </el-tabs>
+            </div>
+          </div>
+          <Carousel />
+          </div>
+        </el-main>
+      <el-footer>Footer</el-footer>
+    </el-container>
   </div>
+
+  <el-backtop :right="100" :bottom="100" />
 </template>
 
 <script lang="ts" setup>
@@ -25,6 +35,7 @@ import type { TabsPaneContext } from 'element-plus'
 import LoginForm from "@/components/loginPage/LoginForm.vue";
 import RegisterForm from "@/components/loginPage/RegisterForm.vue";
 import Owl from "@/components/loginPage/Owl.vue";
+import Carousel from "@/components/loginPage/Carousel.vue";
 
 const activeName = ref('first')
 const handleClick = (tab: TabsPaneContext, event: Event) => {
@@ -33,7 +44,6 @@ const handleClick = (tab: TabsPaneContext, event: Event) => {
 const handleFocus = () => {
   isFocus.value = true
 }
-
 const handleBlur = () => {
   isFocus.value = false
 }

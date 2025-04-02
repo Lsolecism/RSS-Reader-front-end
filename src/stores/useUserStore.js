@@ -2,9 +2,9 @@ import { defineStore } from 'pinia';
 
 export const useUserStore = defineStore('user', {
     state: () => ({
-        avatar: 'https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png',   // 头像URL
+        avatar: '',   // 头像URL
         userId: '',   // 用户ID
-        username: '陈仪瑜',  // 用户名
+        username: '',  // 用户名
         rssSource: '' ,// rss源
         email:'',
         remarks:'',
@@ -12,6 +12,8 @@ export const useUserStore = defineStore('user', {
     }),
     actions: {
         setUserInfo(user) {
+            console.log(user);
+            console.log(user.avatar);
             this.avatar = user.avatar;
             this.userId = user.userId;
             this.username = user.username;
