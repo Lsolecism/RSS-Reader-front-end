@@ -30,18 +30,21 @@
       </el-form-item >
 
       <el-form-item label="Verification" >
-        <el-input v-model="verifiCation"  @blur="handleBlur()" @focus="handleFocus()" />
-        <el-button @click="getVerification" :disabled="countdown>0">
-          <el-text v-if="countdown <=0">获取验证码<el-icon><Message/></el-icon></el-text>
-          <el-text v-else>未获取到？重新发送({{countdown}}s)<el-icon><Refresh /></el-icon></el-text>
-        </el-button>
+        <el-input v-model="verifiCation" @blur="handleBlur()" @focus="handleFocus()">
+          <template #append>
+            <el-button @click="getVerification" :disabled="countdown>0">
+              <el-text v-if="countdown <=0">获取验证码<el-icon><Message/></el-icon></el-text>
+              <el-text v-else>未获取到？重新发送({{countdown}}s)<el-icon><Refresh /></el-icon></el-text>
+            </el-button>
+          </template>
+        </el-input>
       </el-form-item>
 
       <el-form-item>
         <el-button type="primary" plain @click="submitLoginVerificationForm()">
-          Submit
         </el-button>
-        <el-button @click="resetForm()">Reset</el-button>
+        <el-button @click="resetForm()">
+        </el-button>
       </el-form-item>
     </div>
 

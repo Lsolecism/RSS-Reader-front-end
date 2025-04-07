@@ -45,6 +45,7 @@
 import {reactive, ref} from 'vue'
 import { ElNotification} from "element-plus";
 import {useUserStore} from '@/stores/useUserStore'
+import {useRouter} from "vue-router";
 
 const ruleFormRef = ref(null)
 const validateEmail = (rule, value, callback) => {
@@ -66,7 +67,9 @@ const validatePass = (rule, value, callback) => {
   }
 }
 const validateConfirm = (rule,value,callback)=>{
-  if (value !== ruleForm.pass) {
+  if (ruleForm.checkPass !== ruleForm.pass) {
+    console.log("zheshi valueya")
+    console.log(ruleForm.pass,"dwqfc")
     callback(new Error('两次输入的密码不一致呀！😔'))
   } else {
     callback()
@@ -118,7 +121,7 @@ async function submitRegisterForm()  {
       .then(data => {
           if (data.success ==="500") {
             //返回默认的设置
-            useUserStore().setUserInfo({avatar: data.avatar, userId: data.userId, username:data.userId})
+            useUserStore().setUserInfo({avatar: data.avatar, userId: data.userId, username:ruleForm.name})
             useUserStore().setRssSource('')
             ElNotification({
               title: 'Success',
@@ -126,6 +129,7 @@ async function submitRegisterForm()  {
               type: 'success',
             });
             setTimeout(() => {
+              const router =  useRouter()
               router.push({path:`/home/${data.user.userId}`})
             }, 1000);
           } else if (data.success === "200") {

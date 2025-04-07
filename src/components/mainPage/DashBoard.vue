@@ -1,14 +1,6 @@
 <template>
   <div>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 261.76 226.69">
-      <path d="M161.096.001l-30.225 52.351L100.647.001H-.005l130.877 226.688L261.749.001z" fill="#41b883"/>
-      <path d="M161.096.001l-30.225 52.351L100.647.001H52.346l78.526 136.01L209.398.001z" fill="#34495e"/>
-    </svg>
-    <el-button type="primary" plain @click="changeWidth" style="margin-left: 10px">
-      <el-icon v-if="isCollapse"><Expand /></el-icon>
-      <el-icon v-else><Fold /></el-icon>
-    </el-button>
-    <el-icon @click="handleAll"><Grid /></el-icon>
+    <img src="/src/assets/doraemon.png" alt="Logo" style="width: 50px; height: 50px; margin-left: 10px;" @click="handleAll"/>
     <el-menu
         id="menu"
         default-active=""
@@ -29,9 +21,7 @@
           </el-menu-item>
         </el-menu-item-group>
       </el-sub-menu>
-      <el-button-group style="margin-left: 10px">
-        <el-button @click="showAddRssWindow = true"><el-icon><Plus /></el-icon></el-button>
-      </el-button-group>
+      <img src="/src/assets/doraemon.png" alt="Logo" style="width: 50px; height: 50px; margin-left: 10px;" @click="showAddRssWindow = !showAddRssWindow"/>
     </el-menu>
   </div>
   <add-rss-window @add-rss="handleAddRss" v-model="showAddRssWindow"/>
@@ -39,10 +29,11 @@
 
 <script lang="ts" setup>
 import {computed, ref} from 'vue'
-import {Expand, Fold, Plus, Delete, Grid} from '@element-plus/icons-vue'
+import { Delete,} from '@element-plus/icons-vue'
 import AddRssWindow from "@/components/mainPage/SmallWindows/addRssWindow.vue";
 import { useCategoryStore ,STATIC_CATEGORIES} from "@/stores/useCategoryStore"
 import {useUserStore} from "@/stores/useUserStore";
+import {ElNotification} from "element-plus";
 
 const userStore = useUserStore();
 const userId = userStore.userId;
@@ -61,20 +52,42 @@ const handleAddRss = (formData: { categorySelected: string, rss_name: string, rs
   const newName = formData.rss_name;
   const newAddress = formData.rss_address;
   const categoryId = STATIC_CATEGORIES.find(category => category.text === newText)?.id;
-  console.log(categoryId);
-  // 这里要先交给后端，后端返回数据才能处理生成卡片
-  if (categoryId) {
-    const newItem = {
-      // id: Date.now().toString(), // 使用时间戳作为唯一ID
-      // text: newName,
-      // address: newAddress
-      title: "星巴克",
-      comments: "星巴克，美妙又beans",
-      imageSrc: "/images/starbucks.jpg",
-      cardLink: "/food/3"
-    };
-    categoryStore.addItem(categoryId, newItem);
-  }
+  fetch('http://localhost:5000/rss', {
+    method: 'POST',
+    credentials: 'include', // 必须设置
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ action: 'addRss',userId:userId,categoryId:categoryId,rss_name:newName,rss_address:newAddress})})
+      .then(response => response.json())
+      .then(data =>{
+        if (data.success === '500') {
+          data.entries.forEach((entry: any) => {
+            console.log(entry);
+            console.log(entry.image_url);
+            const newItem = {
+              title: entry.title,
+              comments: entry.summary,
+              imageSrc: entry.image_url,
+              cardLink: entry.link
+            };
+            console.log(newItem);
+            categoryStore.addItem(categoryId, newItem);
+          });
+          ElNotification({
+            title: 'Success',
+            message: '添加成功',
+            type: 'success',
+          });
+        }
+        else{
+          ElNotification({
+            title: 'Error',
+            message: '添加失败',
+            type: 'error',
+          });
+        }
+      })
 };
 
 const deleteItem = (item: any, categoryId: any) => {
@@ -82,10 +95,6 @@ const deleteItem = (item: any, categoryId: any) => {
   console.log(categoryId);
   categoryStore.removeItem(categoryId, item);
   console.log(fullCategories);
-};
-
-const changeWidth = () => {
-  isCollapse.value = !isCollapse.value;
 };
 
 const handleClick = (key: string) => {
@@ -99,9 +108,5 @@ const handleClick = (key: string) => {
 .el-menu-vertical {
   width: 180px;
   min-height: 600px;
-}
-.el-menu--collapse {
-  width: 80px;
-  min-height: 700px;
 }
 </style>

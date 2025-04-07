@@ -18,7 +18,6 @@ const router = createRouter({
       path: '/home',
       name: 'qaq',
       component:MainView,
-      meta:{ requiresAuth: true}
     },
     {
       path: '/home/:id(\\d+)',
@@ -31,7 +30,6 @@ const router = createRouter({
       name: 'test',
       // route level code-splitting
       component:TestView,
-      meta:{ requiresAuth: true}
     },
     {
       path: '/:pathMatch(.*)*',

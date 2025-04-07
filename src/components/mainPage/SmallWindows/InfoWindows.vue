@@ -64,6 +64,7 @@ function handleEdit() {
 
 // 保存处理
 const handleSave = async () => {
+
   try {
     // 构造提交数据
     const payload = {
@@ -131,14 +132,12 @@ const handleSave = async () => {
       <el-descriptions-item label="Profile">{{ formData.profile }}</el-descriptions-item>
     </el-descriptions>
 
-
-
 <!--    表单如下    -->
     <el-form v-else :model="formData" label-width="100px" style="margin-top: 20px;">
       <el-form-item label="Photo">
         <el-upload
             class="avatar-uploader"
-            action="http://localhost:5000/api/upload"
+            action="http://localhost:5000/header/principality/avatar"
             :show-file-list="false"
             :on-success="handleAvatarSuccess"
             :before-upload="beforeAvatarUpload"

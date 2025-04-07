@@ -46,7 +46,7 @@ export const useCategoryStore = defineStore('category', {
                 {
                     title: "深夜食堂居酒屋",
                     comments: "日式烧鸟深夜好去处",
-                    imageSrc: "/images/izakaya.jpg",
+                    imageSrc: "https://ipfs.crossbell.io/ipfs/QmTbb2WpmvvM9LYr2w4ibhqB5icWMSa4n9hFjXbgbaKBRb",
                     cardLink: "/food/2"
                 }
             ],
