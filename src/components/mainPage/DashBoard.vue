@@ -5,15 +5,13 @@
         id="menu"
         default-active=""
         class="el-menu-vertical"
-        :collapse="isCollapse"
     >
     <el-sub-menu v-for="category in fullCategories" :key="category.id" :index="String(category.id)" >
         <template #title>
-          <el-icon @click = "handleClick(String(category.id))"><component :is="category.icon" /></el-icon>
-          <span>{{category.text}}</span>
+          <span @click = "handleClick(String(category.id))">{{category.name}}</span>
         </template>
         <el-menu-item-group>
-          <el-menu-item v-for="item in category.items" :key="item.id" :index="item.id">
+          <el-menu-item v-for="item in category.items" :key="item.cardLink" :index="item.cardLink">
             {{ item.title }}
             <el-button type="text" @click.stop.prevent="deleteItem(item, category.id)" style="float: right; margin-left: 20px;">
               <el-icon><Delete /></el-icon>
@@ -31,7 +29,7 @@
 import {computed, ref} from 'vue'
 import { Delete,} from '@element-plus/icons-vue'
 import AddRssWindow from "@/components/mainPage/SmallWindows/addRssWindow.vue";
-import { useCategoryStore ,STATIC_CATEGORIES} from "@/stores/useCategoryStore"
+import { useCategoryStore } from "@/stores/useCategoryStore"
 import {useUserStore} from "@/stores/useUserStore";
 import {ElNotification} from "element-plus";
 
@@ -40,18 +38,16 @@ const userId = userStore.userId;
 const categoryStore = useCategoryStore();
 const emit = defineEmits(['categorySelected', 'ifAll']);
 const showAddRssWindow = ref(false);
-const isCollapse = ref(true);
 const fullCategories = computed(()=>categoryStore.fullCategories)
 
 const handleAll = () => {
   emit('ifAll','all');
 };
-const handleAddRss = (formData: { categorySelected: string, rss_name: string, rss_address: string }) => {
-  console.log(formData);
-  const newText = formData.categorySelected;
+
+const handleAddRss = (formData: {rss_name: string, rss_address: string }) => {
   const newName = formData.rss_name;
   const newAddress = formData.rss_address;
-  const categoryId = STATIC_CATEGORIES.find(category => category.text === newText)?.id;
+  const categoryId = categoryStore.createCategory(newName)
   fetch('http://localhost:5000/rss', {
     method: 'POST',
     credentials: 'include', // 必须设置
@@ -66,8 +62,9 @@ const handleAddRss = (formData: { categorySelected: string, rss_name: string, rs
             console.log(entry);
             console.log(entry.image_url);
             const newItem = {
+              id: entry.published,
               title: entry.title,
-              comments: entry.summary,
+              description: entry.summary,
               imageSrc: entry.image_url,
               cardLink: entry.link
             };
@@ -81,6 +78,7 @@ const handleAddRss = (formData: { categorySelected: string, rss_name: string, rs
           });
         }
         else{
+          categoryStore.removeCategory(categoryId)
           ElNotification({
             title: 'Error',
             message: '添加失败',
@@ -91,10 +89,7 @@ const handleAddRss = (formData: { categorySelected: string, rss_name: string, rs
 };
 
 const deleteItem = (item: any, categoryId: any) => {
-  console.log(item);
-  console.log(categoryId);
   categoryStore.removeItem(categoryId, item);
-  console.log(fullCategories);
 };
 
 const handleClick = (key: string) => {
@@ -105,8 +100,5 @@ const handleClick = (key: string) => {
 </script>
 
 <style>
-.el-menu-vertical {
-  width: 180px;
-  min-height: 600px;
-}
+
 </style>

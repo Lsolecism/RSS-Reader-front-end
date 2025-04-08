@@ -7,7 +7,7 @@ import { storeToRefs } from "pinia";
 import { computed, ref, onMounted } from 'vue'
 
 const categoryStore = useCategoryStore()
-const { userItems } = storeToRefs(categoryStore)
+const { userCategories } = storeToRefs(categoryStore)
 
 // 当前选中的分类ID（'all' 表示显示全部）
 const activeCategoryId = ref('all')
@@ -16,23 +16,38 @@ const activeCategoryId = ref('all')
 const cardsData = computed(() => {
   if (activeCategoryId.value === 'all') {
     // 合并所有分类的卡片
-    return Object.values(userItems.value).flat()
+    return Object.values(userCategories.value)
+        .flatMap(category => category.items)
   }
-  return userItems.value[activeCategoryId.value] || []
+  return userCategories.value[activeCategoryId.value]?.items || []
 })
 
 const handleCategorySelected = (categoryId) => {
   console.log("当前分类:", categoryId)
   activeCategoryId.value = categoryId
+  currentPage.value = 1
 }
 
 const handleSearch = (searchId) => {
   console.log("搜索关键词:", searchId)
   activeCategoryId.value = searchId[0]
+  currentPage.value = 1
+}
+
+const handlePageChange = (page) => {
+  currentPage.value = page
 }
 // 初始化显示所有卡片
 onMounted(() => {
   activeCategoryId.value = 'all'
+})
+// 分页状态
+const currentPage = ref(1)
+const itemsPerPage = 6 // 每页显示的卡片数量
+const paginatedCardsData = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  return cardsData.value.slice(start, end)
 })
 </script>
 
@@ -47,16 +62,24 @@ onMounted(() => {
           <Header @search="handleSearch"/>
         </el-header>
         <el-main class="card-flex">
-          <!-- 修改为使用 cardsData -->
           <Cards
-              v-for="card in cardsData"
+              v-for="card in paginatedCardsData"
               :key="card.id"
               :title="card.title"
-              :comments="card.comments"
+              :description="card.description"
               :image-src="card.imageSrc"
               :card-link="card.cardLink"
           />
         </el-main>
+        <el-footer>
+          <el-pagination
+              :current-page="currentPage"
+              :page-size="itemsPerPage"
+              layout="prev, pager, next, jumper"
+              :total="cardsData.length"
+              @current-change="handlePageChange"
+          />
+        </el-footer>
       </el-container>
     </el-container>
   </div>

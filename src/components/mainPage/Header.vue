@@ -1,42 +1,49 @@
 <script setup>
-import {Edit, Orange, Search, Setting, Star, SwitchButton, User} from "@element-plus/icons-vue";
-import {ref} from "vue";
-import RatingWindow from "@/components/mainPage/SmallWindows/RatingWindow.vue";
-import EditWindow from "@/components/mainPage/SmallWindows/EditWindow.vue";
-import InfoWindows from "@/components/mainPage/SmallWindows/InfoWindows.vue";
-import ExitWindow from "@/components/mainPage/SmallWindows/ExitWindow.vue";
-import SettingWindow from "@/components/mainPage/SmallWindows/SettingWindow.vue";
-import HelpWindow from "@/components/mainPage/SmallWindows/HelpWindow.vue";
-import {useUserStore} from "@/stores/useUserStore.js"
-import {useCategoryStore} from "@/stores/useCategoryStore.js";
-import {storeToRefs} from "pinia";
+import { Edit, Orange, Search, Setting, Star, SwitchButton, User } from "@element-plus/icons-vue";
+import { ref } from "vue";
+import { defineAsyncComponent } from 'vue';
+import { useUserStore } from "@/stores/useUserStore.js";
+import { useCategoryStore } from "@/stores/useCategoryStore.js";
+import { storeToRefs } from "pinia";
 
-const showRatingWindow = ref(false)
-const showEditWindow = ref(false)
-const showInfoWindow = ref(false)
-const showExitWindow = ref(false)
-const showSettingWindow = ref(false)
-const showHelpWindow = ref(false)
-const input = ref('')
-const userStore = useUserStore()
-const categoryStore = useCategoryStore()
-const { userItems } = storeToRefs(categoryStore)
+const showRatingWindow = ref(false);
+const showEditWindow = ref(false);
+const showInfoWindow = ref(false);
+const showExitWindow = ref(false);
+const showSettingWindow = ref(false);
+const showHelpWindow = ref(false);
+const input = ref('');
+const userStore = useUserStore();
+const categoryStore = useCategoryStore();
+const { fullCategories } = storeToRefs(categoryStore);
 const emit = defineEmits(['search']); // 定义向父组件传递的事件
 
-const getAllItems = () => {
-  return Object.entries(userItems.value).flatMap(([categoryId, items]) =>
-      items.map(item => ({ ...item, categoryId }))
-  );
-};
+// 动态引入窗口组件
+const RatingWindow = defineAsyncComponent(() => import('@/components/mainPage/SmallWindows/RatingWindow.vue'));
+const EditWindow = defineAsyncComponent(() => import('@/components/mainPage/SmallWindows/EditWindow.vue'));
+const InfoWindows = defineAsyncComponent(() => import('@/components/mainPage/SmallWindows/InfoWindows.vue'));
+const ExitWindow = defineAsyncComponent(() => import('@/components/mainPage/SmallWindows/ExitWindow.vue'));
+const SettingWindow = defineAsyncComponent(() => import('@/components/mainPage/SmallWindows/SettingWindow.vue'));
+const HelpWindow = defineAsyncComponent(() => import('@/components/mainPage/SmallWindows/HelpWindow.vue'));
 
 // 搜索逻辑（复用给建议列表和回车事件）
 const performSearch = (query) => {
   if (!query) return [];
   const searchText = query.toLowerCase();
-  return getAllItems().filter(item =>
-      item.title.toLowerCase().includes(searchText) ||
-      item.comments.toLowerCase().includes(searchText)
-  );
+  console.log(searchText);
+  return fullCategories.value
+      .flatMap(category => {
+        return category.items
+            .filter(item =>
+                item.title.toLowerCase().includes(searchText) ||
+                (item.description && item.description.toLowerCase().includes(searchText))
+            )
+            .map(item => ({
+              ...item,
+              categoryId: category.id,
+              categoryName: category.name
+            }));
+      });
 };
 
 // 自动建议搜索
@@ -49,12 +56,12 @@ const querySearch = (queryString, cb) => {
 const handleEnter = () => {
   const results = performSearch(input.value);
   if (results.length > 0) {
-    // 去重并传递所有匹配的 categoryId
     const categoryIds = [...new Set(results.map(item => item.categoryId))];
     console.log(categoryIds);
     emit('search', categoryIds);
   }
 };
+
 </script>
 
 <template>
@@ -100,7 +107,8 @@ const handleEnter = () => {
   <HelpWindow v-model="showHelpWindow" />
 </template>
 
-<style scoped>.example-showcase .el-dropdown-link {
+<style scoped>
+.example-showcase .el-dropdown-link {
   cursor: pointer;
   color: var(--el-color-primary);
   display: flex;

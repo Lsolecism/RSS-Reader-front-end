@@ -18,7 +18,7 @@
       </div>
 
       <div class="text-container">
-        <span class="line-text">{{ comments }}</span>
+        <span class="line-text">{{ description }}</span>
       </div>
     </div>
 
@@ -32,10 +32,14 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 
+async function sendCardLink() {
+  window.open(props.cardLink, '_blank');
+}
+
 const props = defineProps({
   // 原有props保持不变
   title: { type: String, required: true },
-  comments: { type: String, required: true },
+  description: { type: String, required: true },
   imageSrc: { type: String, required: true },
   cardLink: { type: String, required: true },
 
