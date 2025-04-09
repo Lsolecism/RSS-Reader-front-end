@@ -110,7 +110,7 @@ async function submitRegisterForm()  {
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   const hashedPassword = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-  fetch('http://localhost:5000/login', {
+  fetch('http://localhost:5000/register', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

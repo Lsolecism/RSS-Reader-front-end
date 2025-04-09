@@ -3,6 +3,7 @@ import LoginView from "@/views/LoginView.vue";
 import MainView from "@/views/MainView.vue";
 import TestView from "@/views/TestView.vue";
 import {useUserStore} from "@/stores/useUserStore.js";
+import ShowView from "@/views/ShowView.vue";
 
 
 const router = createRouter({
@@ -36,6 +37,11 @@ const router = createRouter({
       name: 'notFound',
       component: () => import('@/views/NotFoundView.vue'),
       meta:{ requiresAuth: false}
+    },
+    {
+      path: '/show',
+      name: 'show',
+      component: ShowView
     }
   ],
 })

@@ -31,9 +31,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import {useUserStore} from "@/stores/useUserStore.js";
+import router from "@/router/index.js";
 
-async function sendCardLink() {
-  window.open(props.cardLink, '_blank');
+
+
+function sendCardLink() {
+  router.push({ path: '/show', query: { link: props.cardLink,userId:useUserStore().userId ,title: props.title } });
 }
 
 const props = defineProps({
@@ -42,7 +46,6 @@ const props = defineProps({
   description: { type: String, required: true },
   imageSrc: { type: String, required: true },
   cardLink: { type: String, required: true },
-
   // 新增效果开关
   enableEffects: { type: Boolean, default: true }
 });

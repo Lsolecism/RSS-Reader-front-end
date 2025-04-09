@@ -1,9 +1,9 @@
 <script setup>
-import {reactive} from "vue";
+import { ref} from "vue";
 import { Check, Close } from '@element-plus/icons-vue'
 
 const dialogFormVisible = defineModel()
-const form = reactive({
+const form = ref({
   rss_root: '',
 })
 const handleClick = (url) => {
