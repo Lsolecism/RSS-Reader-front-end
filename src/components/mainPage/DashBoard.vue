@@ -6,14 +6,14 @@
         default-active=""
         class="el-menu-vertical"
     >
-    <el-sub-menu v-for="category in fullCategories" :key="category.id" :index="String(category.id)" >
+    <el-sub-menu v-for="category in fullCategories" :key="category.Id" :index="String(category.Id)" >
         <template #title>
-          <span @click = "handleClick(String(category.id))">{{category.name}}</span>
+          <span @click = "handleClick(String(category.Id))">{{category.Name}}</span>
         </template>
         <el-menu-item-group>
-          <el-menu-item v-for="item in category.items" :key="item.cardLink" :index="item.cardLink">
-            {{ item.title }}
-            <el-button type="text" @click.stop.prevent="deleteItem(item, category.id)" style="float: right; margin-left: 20px;">
+          <el-menu-item v-for="item in category.Items" :key="item.Link" :index="item.Link">
+            {{ item.Title }}
+            <el-button type="text" @click.stop.prevent="deleteItem(item, category.Id)" style="float: right; margin-left: 20px;">
               <el-icon><Delete /></el-icon>
             </el-button>
           </el-menu-item>
@@ -34,7 +34,7 @@ import {useUserStore} from "@/stores/useUserStore";
 import {ElNotification} from "element-plus";
 
 const userStore = useUserStore();
-const userId = userStore.userId;
+const email = userStore.email;
 const categoryStore = useCategoryStore();
 const emit = defineEmits(['categorySelected', 'ifAll']);
 const showAddRssWindow = ref(false);
@@ -44,6 +44,8 @@ const handleAll = () => {
   emit('ifAll','all');
 };
 
+
+//这部分函数还需要进行更细致的添加格式修改
 const handleAddRss = (formData: {rss_name: string, rss_address: string }) => {
   const newName = formData.rss_name;
   const newAddress = formData.rss_address;
@@ -54,7 +56,7 @@ const handleAddRss = (formData: {rss_name: string, rss_address: string }) => {
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ action: 'addRss',userId:userId,categoryId:categoryId,rss_name:newName,rss_address:newAddress})})
+    body: JSON.stringify({ action: 'addRss',email:email,rss_name:newName,rss_address:newAddress})})
       .then(response => response.json())
       .then(data =>{
         if (data.success === '500') {
@@ -62,11 +64,11 @@ const handleAddRss = (formData: {rss_name: string, rss_address: string }) => {
             console.log(entry);
             console.log(entry.image_url);
             const newItem = {
-              id: entry.published,
-              title: entry.title,
-              description: entry.summary,
-              imageSrc: entry.image_url,
-              cardLink: entry.link
+              Id: entry.published,
+              Title: entry.title,
+              Description: entry.summary,
+              ImageUrl: entry.image_url,
+              Link: entry.link
             };
             console.log(newItem);
             categoryStore.addItem(categoryId, newItem);
@@ -97,6 +99,9 @@ const handleClick = (key: string) => {
   console.log('被选择的列');
   emit('categorySelected', key);
 };
+
+
+
 </script>
 
 <style>

@@ -2,31 +2,44 @@ import { defineStore } from 'pinia';
 
 export const useUserStore = defineStore('user', {
     state: () => ({
-        avatar: '',   // 头像URL
-        userId: '',   // 用户ID
-        username: '',  // 用户名
-        rssSource: '' ,// rss源
-        email:'',
+        AvatarURL: '',   // 头像URL
+        UID: '',   // 用户ID
+        Name: '',  // 用户名
+        RssSource: '' ,// rss源
+        Email:localStorage.getItem('Email') ||'',
         remarks:'',
-        profile: '',
+        Profile: '',
     }),
     actions: {
         setUserInfo(user) {
-            console.log(user);
-            console.log(user.avatar);
-            this.avatar = user.avatar;
-            this.userId = user.userId;
-            this.username = user.username;
-        },
-        setRssSource(rss_source) {
-            this.rssSource = rss_source;
-        },
-        updateUserInfo(user){
-            this.avatar = user.avatar;
-            this.username = user.username;
-            this.email = user.email;
+            this.AvatarURL = user.AvatarURL;
+            this.UID = user.UID;
+            this.Name = user.Name;
+            this.RssSource = user.RssSource;
+            this.Email = user.Email;
+            localStorage.setItem('Email', user.Email);
             this.remarks = user.remarks;
-            this.profile = user.profile;
+            this.Profile = user.Profile;
+        },
+        // setRssSource(RssSource) {
+        //     this.RssSource = RssSource;
+        // },
+        updateUserInfo(user){
+            this.AvatarURL = user.AvatarURL;
+            this.Name = user.Name;
+            this.Email = user.Email;
+            this.remarks = user.remarks;
+            this.Profile = user.Profile;
+        },
+        clearUserInfo() {
+            this.AvatarURL = '';
+            this.UID = '';
+            this.Name = '';
+            this.RssSource = '';
+            this.Email = '';
+            this.remarks = '';
+            this.Profile = '';
+            localStorage.removeItem('Email');
         }
     }
 });

@@ -50,8 +50,7 @@ router.beforeEach(async (to) => {
   const userStore = useUserStore()
 
   // 从 store 获取认证状态
-  const isAuthenticated = !!userStore.userId
-
+  const isAuthenticated = !!userStore.Email
   // 需要认证且未登录的情况
   if (to.meta.requiresAuth && !isAuthenticated) {
     return {
@@ -60,10 +59,12 @@ router.beforeEach(async (to) => {
     }
   }
 
+
+  // 不知道怎么处理
   // 已登录用户禁止访问登录页
-  if (to.name === 'loginPage' && isAuthenticated) {
-    return { name: 'home', params: { id: userStore.id } } // 使用实际用户ID
-  }
+  // if (to.name === 'loginPage' && isAuthenticated) {
+  //   return { name: 'home', params: { id: userStore.userId } } // 使用实际用户ID
+  // }
 
   return true
 })

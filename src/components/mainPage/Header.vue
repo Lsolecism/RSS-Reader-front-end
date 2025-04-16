@@ -1,10 +1,9 @@
 <script setup>
 import { Edit, Orange, Search, Setting, Star, SwitchButton, User } from "@element-plus/icons-vue";
-import { ref } from "vue";
+import {computed, ref} from "vue";
 import { defineAsyncComponent } from 'vue';
 import { useUserStore } from "@/stores/useUserStore.js";
-import { useCategoryStore } from "@/stores/useCategoryStore.js";
-import { storeToRefs } from "pinia";
+import {useCategoryStore} from "@/stores/useCategoryStore.js";
 
 const showRatingWindow = ref(false);
 const showEditWindow = ref(false);
@@ -14,8 +13,10 @@ const showSettingWindow = ref(false);
 const showHelpWindow = ref(false);
 const input = ref('');
 const userStore = useUserStore();
-const categoryStore = useCategoryStore();
-const { fullCategories } = storeToRefs(categoryStore);
+const categoryStore = useCategoryStore()
+const userCategoriesArray = computed(() =>
+    Object.values(categoryStore.UserCategories) // 转换为数组
+);
 const emit = defineEmits(['search']); // 定义向父组件传递的事件
 
 // 动态引入窗口组件
@@ -30,26 +31,27 @@ const HelpWindow = defineAsyncComponent(() => import('@/components/mainPage/Smal
 const performSearch = (query) => {
   if (!query) return [];
   const searchText = query.toLowerCase();
-  console.log(searchText);
-  return fullCategories.value
+
+  return userCategoriesArray.value // 使用转换后的数组
       .flatMap(category => {
-        return category.items
+        return (category.Items || []) // 防御空值
             .filter(item =>
-                item.title.toLowerCase().includes(searchText) ||
-                (item.description && item.description.toLowerCase().includes(searchText))
+                (item.Title?.toLowerCase() || '').includes(searchText) ||
+                (item.Description?.toLowerCase() || '').includes(searchText)
             )
             .map(item => ({
               ...item,
-              categoryId: category.id,
-              categoryName: category.name
+              categoryId: category.Id,
+              categoryName: category.Name
             }));
       });
 };
 
+
 // 自动建议搜索
 const querySearch = (queryString, cb) => {
   const results = performSearch(queryString);
-  cb(results.map(item => ({ ...item, value: item.title })));
+  cb(results.map(item => ({ ...item, value: item.Title })));
 };
 
 // 回车事件处理
@@ -78,8 +80,8 @@ const handleEnter = () => {
         @keyup.enter.native="handleEnter"
     />
     <div class="right-section">
-      <img :src="userStore.avatar" alt="" style="width: 50px; height: 50px; border-radius: 50%;" >
-      <el-text class>{{userStore.username}}</el-text>
+      <img :src="userStore.AvatarURL" alt="" style="width: 50px; height: 50px; border-radius: 50%;" >
+      <el-text class>{{userStore.Name}}</el-text>
       <el-dropdown>
         <span class="el-dropdown-link">
           <el-icon class="el-icon--right" size="25px">

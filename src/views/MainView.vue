@@ -5,10 +5,13 @@ import Cards from "@/components/mainPage/Cards.vue";
 import { useCategoryStore } from '@/stores/useCategoryStore.js'
 import { storeToRefs } from "pinia";
 import { computed, ref, onMounted } from 'vue'
+import {useUserStore} from "@/stores/useUserStore.js";
+import router from "@/router/index.js";
+
 
 const categoryStore = useCategoryStore()
-const { userCategories } = storeToRefs(categoryStore)
-
+const { UserCategories } = storeToRefs(categoryStore)
+const Email = useUserStore().Email
 // 当前选中的分类ID（'all' 表示显示全部）
 const activeCategoryId = ref('all')
 
@@ -16,10 +19,10 @@ const activeCategoryId = ref('all')
 const cardsData = computed(() => {
   if (activeCategoryId.value === 'all') {
     // 合并所有分类的卡片
-    return Object.values(userCategories.value)
-        .flatMap(category => category.items)
+    return Object.values(UserCategories.value)
+        .flatMap(category => category.Items)
   }
-  return userCategories.value[activeCategoryId.value]?.items || []
+  return UserCategories.value[activeCategoryId.value]?.Items || []
 })
 
 const handleCategorySelected = (categoryId) => {
@@ -37,9 +40,70 @@ const handleSearch = (searchId) => {
 const handlePageChange = (page) => {
   currentPage.value = page
 }
+
+const getRssCards = () => {
+  // 暂时重置所有分类，这个之后肯定是用路由守卫来进行操作
+  return new Promise((resolve) => {
+    Object.keys(UserCategories.value).forEach(categoryId => {
+      categoryStore.removeCategory(categoryId);
+    });
+    fetch('http://localhost:5000/getRssCards', {
+      method: 'POST',
+      credentials: 'include', // 必须设置
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({Email:Email})})
+        .then(response => response.json())
+        .then(data =>{
+          for (let i = 0; i < data["RssCards"].length; i++){
+            const source = data["RssCards"][i];
+            const RssUrl = source.RssUrl;
+            const RssId = source["_id"];
+            const categoryId = categoryStore.createCategory(source["RssName"], RssUrl)
+            for (let j = 0; j < source["Articles"].length; j++) {
+              const card = source["Articles"][j];
+              const item = {
+                Title: card["Title"],
+                Description: card["Description"],
+                ImageUrl: card.Content["ImageUrl"],
+                Link: card["Link"],
+                Published: card.Published,
+                Author: card.Author,
+                IsReaded: card.IsReaded,
+                RssId:RssId
+              };
+              categoryStore.addItem(categoryId, item)
+              if (!UserCategories.value[categoryId]) {}
+            }
+          }
+        }).finally(()=>resolve())
+  });
+}
+
+function getUser() {
+  return new Promise((resolve) => { // 添加 Promise 包装
+    fetch('http://localhost:5000/login', {
+      method: 'POST',
+      credentials: 'include', // 必须设置
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({action:'getUser',Email:localStorage.getItem('Email')})})
+        .then(response => response.json())
+        .then(data =>{
+          useUserStore().setUserInfo(data.user)
+        }).finally(() => resolve())
+  })
+}
+
 // 初始化显示所有卡片
-onMounted(() => {
-  activeCategoryId.value = 'all'
+onMounted(async () => {
+  await getUser();
+  if(!useCategoryStore().HasLoaded){
+    await getRssCards()
+    useCategoryStore().setLoadedStatus(true)
+  }
 })
 // 分页状态
 const currentPage = ref(1)
@@ -49,6 +113,11 @@ const paginatedCardsData = computed(() => {
   const end = start + itemsPerPage
   return cardsData.value.slice(start, end)
 })
+function sendCardLink (card) {
+  useCategoryStore().setArticleIsReaded(card.Link, true)
+  console.log(useCategoryStore().fullCategories)
+  router.push({path: '/show', query: {Link: card.Link, RssId: card.RssId["$oid"]}});
+}
 </script>
 
 <template>
@@ -65,10 +134,15 @@ const paginatedCardsData = computed(() => {
           <Cards
               v-for="card in paginatedCardsData"
               :key="card.id"
-              :title="card.title"
-              :description="card.description"
-              :image-src="card.imageSrc"
-              :card-link="card.cardLink"
+              :title="card.Title"
+              :description="card.Description"
+              :image-src="card.ImageUrl"
+              :card-link="card.Link"
+              :author="card.Author"
+              :published="card.Published"
+              :is-readed="card.IsReaded"
+              :rss-id="card.RssId"
+              @click="sendCardLink(card)"
           />
         </el-main>
         <el-footer>

@@ -121,8 +121,7 @@ async function submitRegisterForm()  {
       .then(data => {
           if (data.success ==="500") {
             //返回默认的设置
-            useUserStore().setUserInfo({avatar: data.avatar, userId: data.userId, username:ruleForm.name})
-            useUserStore().setRssSource('')
+            useUserStore().setUserInfo(data.user)
             ElNotification({
               title: 'Success',
               message: '注册成功!😀',
@@ -130,7 +129,7 @@ async function submitRegisterForm()  {
             });
             setTimeout(() => {
               const router =  useRouter()
-              router.push({path:`/home/${data.user.userId}`})
+              router.push({path:`/home/${data.user.UID}`})
             }, 1000);
           } else if (data.success === "200") {
             ElNotification({

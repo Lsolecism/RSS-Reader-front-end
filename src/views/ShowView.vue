@@ -2,31 +2,35 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import router from "@/router/index.js";
+import {useUserStore} from "@/stores/useUserStore.js";
 const route = useRoute();
-const link = route.query.link;
-const userId = route.query.userId;
-const title = route.query.title;
 
-const htmlContent = ref('');
+const Link = route.query.Link;
+const RssId = route.query.RssId;
+const HtmlContent = ref('');
 
 // 从路由参数获取内容或调用API
 onMounted(async () => {
-  await fetch("http://localhost:5000/rss/getArticle", {
+  await fetch("http://localhost:5000/rss/article", {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ action: 'getArticle', link: link ,userId: userId})
-  }).then(response => response.text())
+    body: JSON.stringify({ action: 'getArticle', Link: Link ,RssId:RssId})
+  }).then(response => response.json())
     .then(data => {
       if (data.success === "500"){
-        htmlContent.value = `<h1>${{title}}<h1>`+data.article;
+        HtmlContent.value = `<h1>${data["Article"]["Title"]}</h1>`
+            +`<div style="font-size: 12px">by:${data["Article"]["Author"]}——published:${data["Article"]["Published"]}</div>
+              <div style="font-size: 15px">${data["Article"]["Description"]}</div>
+              <a style="font-size: 10px" href="${data["Article"]["Link"]}" target="_blank">原文链接</a>`
+            +data["Article"].Content.Value;
       }
     })
 });
 
 const handleGoBack = () => {
-  router.push({ path: `/home/${userId}`});
+  router.push({path:`/home/${useUserStore().UID}`})
 };
 </script>
 
@@ -41,7 +45,7 @@ const handleGoBack = () => {
     </el-button>
     <div
         class="content-wrapper"
-        v-html="htmlContent"
+        v-html="HtmlContent"
     ></div>
   </div>
 </template>

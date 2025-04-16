@@ -1,8 +1,14 @@
 <template>
-  <el-card class="enhanced-card" @click="sendCardLink">
+  <el-card class="enhanced-card">
     <template #header>
       <div class="card-header">
         {{ title }}
+        <el-icon v-if="props.isReaded"><Sugar/></el-icon>
+        <el-icon v-else><Lollipop /></el-icon>
+        <div class="author-date-container">
+          <span class="author">by:{{ author }}</span>
+          <span class="date">{{published }}</span>
+        </div>
         <div class="header-underline"></div>
       </div>
     </template>
@@ -30,15 +36,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import {useUserStore} from "@/stores/useUserStore.js";
-import router from "@/router/index.js";
-
-
-
-function sendCardLink() {
-  router.push({ path: '/show', query: { link: props.cardLink,userId:useUserStore().userId ,title: props.title } });
-}
+import {ref, onMounted} from 'vue';
+import {Lollipop, Sugar} from "@element-plus/icons-vue";
 
 const props = defineProps({
   // 原有props保持不变
@@ -46,6 +45,10 @@ const props = defineProps({
   description: { type: String, required: true },
   imageSrc: { type: String, required: true },
   cardLink: { type: String, required: true },
+  author: { type: String, required: true },
+  published:{type:String,required:true},
+  isReaded: { type: Boolean, default: false },
+  rssId: { type: Object,required:true },
   // 新增效果开关
   enableEffects: { type: Boolean, default: true }
 });
@@ -101,12 +104,24 @@ onMounted(() => {
 /* 标题样式 */
 .card-header {
   position: relative;
-  font-size: 1.4rem;
+  font-size: 1.7rem;
   font-weight: 600;
   color: var(--text-color);
   padding: 0 0 1rem;
   letter-spacing: 0.05em;
 }
+
+.author {
+  font-size: 1.2rem;
+}
+
+.date {
+  font-size: 1rem;
+  color: var(--text-color);
+  opacity: 0.6;
+  padding-left: 15px;
+}
+
 
 .header-underline {
   position: absolute;
@@ -159,7 +174,7 @@ onMounted(() => {
   line-height: 1.6;
   color: var(--text-color);
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
   position: relative;

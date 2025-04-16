@@ -19,9 +19,9 @@
 
       <el-form-item>
         <el-button type="primary" plain @click="submitLoginForm()">
-          Submit
+          登陆
         </el-button>
-        <el-button @click="resetForm()">Reset</el-button>
+        <el-button @click="resetForm()">清空</el-button>
       </el-form-item>
     </div>
     <div v-else>
@@ -42,8 +42,10 @@
 
       <el-form-item>
         <el-button type="primary" plain @click="submitLoginVerificationForm()">
+          登录
         </el-button>
         <el-button @click="resetForm()">
+          重置
         </el-button>
       </el-form-item>
     </div>
@@ -70,6 +72,7 @@ const isLogin = ref(true)
 const countdown = ref(0)
 let timer = null
 
+//提交验证码表单的逻辑函数
 async function submitLoginVerificationForm(){
   fetch('http://localhost:5000/login', {
     method: 'POST',
@@ -85,71 +88,73 @@ async function submitLoginVerificationForm(){
         //当data.success为500时，说明登录成功，可以进行后续操作
         //获取user的信息，并设置到store中
         // 当前后端还没写data.user
-        const userStore = useUserStore()
-        userStore.setRssSource(data.rssSource)
-        userStore.setUserInfo(data.user)
+        useUserStore().setUserInfo(data.user)
         ElNotification({
           title: 'Success',
           message: '登录成功，正在跳转中...',
           type: 'success',
         });
         setTimeout(() => {
-          router.push({path:`/home/${data.user.userId}`})
+          router.push({path:`/home/${data.user.UID}`})
         }, 1000);
       }
     })
 }
 
-//发送验证码的逻辑
-async function getVerification(){
+//发送验证码的逻辑对应后端处理代码为：handle_verification
+// 发送验证码的优化版本
+async function getVerification() {
   if (countdown.value > 0) {
-    ElNotification({
+    ElNotification.warning({
       title: '提示',
-      message: `请${countdown.value}秒后再试`,
-      type: 'warning'
-    })
-    return
+      message: `请${countdown.value}秒后再试`
+    });
+    return;
   }
-  fetch('http://localhost:5000/login', {
-    method: 'POST',
-    credentials: 'include', // 必须设置
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ action: 'getVerification', userEmail: ruleForm.email })
-  })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success === "500") {
-        //当data.success为500时，说明验证码发送成功
-        countdown.value = 30
-        timer = setInterval(() => {
-          countdown.value--
-          if (countdown.value === 0) {
-            clearInterval(timer)
-          }
-        }, 1000)
-        ElNotification({
-          title: 'Success',
-          message: '验证码发送成功，请注意查收！😀',
-          type: 'success',
-        });
-      }else if (data.success === "200") {
-        //当data.success为200时，说明邮箱不存在
-        ElNotification({
-          title: 'Error',
-          message: '邮箱不存在，请检查邮箱或前往注册呀！😂',
-        })
-      }
-      else {
-        ElNotification({
-          title: 'Error',
-          message: '验证码发送失败，请稍后再试！',
-          type: 'error',
-        });
-      }
-    })
+
+  try {
+    const response = await fetch('http://localhost:5000/login', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'getVerification',
+        userEmail: ruleForm.email
+      })
+    });
+
+    const data = await response.json();
+    if (data.success === "200") {
+      startCountdown();
+      ElNotification.success({
+        title: '成功',
+        message: '验证码发送成功，请注意查收！😀'
+      });
+    } else if (data.success === "500") {
+      ElNotification.error({
+        title: '错误',
+        message: '邮箱不存在，请检查邮箱或前往注册呀！😂'
+      });
+    }
+  } catch (error) {
+    ElNotification.error({
+      title: '错误',
+      message: `发生错误：${error.message || '验证码发送失败，请稍后再试！'}`
+    });
+  }
 }
+
+// 倒计时逻辑封装
+function startCountdown() {
+  countdown.value = 30;
+  timer = setInterval(() => {
+    countdown.value = Math.max(0, countdown.value - 1);
+    if (countdown.value === 0) {
+      clearInterval(timer);
+    }
+  }, 1000);
+}
+
 
 //表单验证的逻辑
 const ruleFormRef = ref(null);
@@ -225,14 +230,13 @@ async function submitLoginForm()
             //当data.success为500时，说明登录成功，可以进行后续操作
             //获取user的信息，并设置到store中
             useUserStore().setUserInfo(data.user)
-            useUserStore().setRssSource(data.rssSource)
             ElNotification({
               title: 'Success',
               message: '登录成功呀!😀',
               type: 'success',
             });
             setTimeout(() => {
-              router.push({path:`/home/${data.user.userId}`})
+              router.push({ name: 'home', params: { id: data.user.UID } })
             }, 1000);
           }else if (data.success === "200") {
             //当data.success为200时，说明邮箱不存在

@@ -1,5 +1,6 @@
 <script setup>
 import {reactive} from "vue";
+import {useUserStore} from "@/stores/useUserStore.js";
 
 const dialogFormVisible = defineModel()
 const formLabelWidth = '140px'
@@ -7,7 +8,9 @@ const form = reactive({
 })
 function logout() {
   dialogFormVisible.value = false
+  useUserStore().clearUserInfo()
   window.location.href = "/"
+
 }
 </script>
 
