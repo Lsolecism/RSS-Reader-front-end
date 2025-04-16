@@ -80,7 +80,7 @@ const handleEnter = () => {
         @keyup.enter.native="handleEnter"
     />
     <div class="right-section">
-      <img :src="userStore.AvatarURL" alt="" style="width: 50px; height: 50px; border-radius: 50%;" >
+      <img :src="`http://localhost:5000/image/${userStore.AvatarURL}`" alt="" style="width: 50px; height: 50px; border-radius: 50%;" >
       <el-text class>{{userStore.Name}}</el-text>
       <el-dropdown>
         <span class="el-dropdown-link">
