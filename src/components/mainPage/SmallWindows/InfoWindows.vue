@@ -69,7 +69,7 @@ const handleSave = async () => {
       Name: formData.value.Name,
       Email: formData.value.Email,
       remarks: formData.value.remarks,
-      Profile: formData.value.Profile
+      Profile: formData.value.Profile,
     }
     // 提交到后端
     const response = await fetch('http://localhost:5000/updateInfo', {
@@ -98,10 +98,10 @@ const handleSave = async () => {
 </script>
 
 <template>
-  <el-dialog v-model="dialogFormVisible" title="评分" width="500">
+  <el-dialog v-model="dialogFormVisible" title="个人主页" width="700">
     <el-descriptions
         v-if="!isEditing"
-        title="Width vertical list"
+        title="详情"
         direction="vertical"
         border
         style="margin-top: 20px"
@@ -109,7 +109,7 @@ const handleSave = async () => {
       <el-descriptions-item
           :rowspan="2"
           :width="140"
-          label="Photo"
+          label="头像"
           align="center"
       >
         <el-image
@@ -117,18 +117,18 @@ const handleSave = async () => {
             :src="`http://localhost:5000/image/${userStore.AvatarURL}`"
         />
       </el-descriptions-item>
-      <el-descriptions-item label="Username">{{ formData.Name }}</el-descriptions-item>
-      <el-descriptions-item label="UserID">{{ formData.UID }}</el-descriptions-item>
-      <el-descriptions-item label="Email">{{ formData.Email }}</el-descriptions-item>
-      <el-descriptions-item label="Remarks">
+      <el-descriptions-item label="昵称">{{ formData.Name }}</el-descriptions-item>
+      <el-descriptions-item label="UID">{{ formData.UID }}</el-descriptions-item>
+      <el-descriptions-item label="邮箱">{{ formData.Email }}</el-descriptions-item>
+      <el-descriptions-item label="标签">
         <el-tag size="small">{{ formData.remarks }}</el-tag>
       </el-descriptions-item>
-      <el-descriptions-item label="Profile">{{ formData.Profile }}</el-descriptions-item>
+      <el-descriptions-item label="个人简介">{{ formData.Profile }}</el-descriptions-item>
     </el-descriptions>
 
 <!--    表单如下    -->
     <el-form v-else :model="formData" label-width="100px" style="margin-top: 20px;">
-      <el-form-item label="Photo">
+      <el-form-item label="头像">
         <el-upload
             class="avatar-uploader"
             action="http://localhost:5000/uploadImage"
@@ -140,19 +140,19 @@ const handleSave = async () => {
           <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
         </el-upload>
       </el-form-item>
-      <el-form-item label="Username">
+      <el-form-item label="昵称">
         <el-input v-model="formData.Name" />
       </el-form-item>
-      <el-form-item label="Telephone">
+      <el-form-item label="UID">
         <el-input v-model="formData.UID" />
       </el-form-item>
-      <el-form-item label="Place">
+      <el-form-item label="邮箱">
         <el-input v-model="formData.Email" />
       </el-form-item>
-      <el-form-item label="Remarks">
+      <el-form-item label="标签">
         <el-input v-model="formData.remarks" />
       </el-form-item>
-      <el-form-item label="Address">
+      <el-form-item label="个人简介">
         <el-input v-model="formData.Profile" type="textarea" />
       </el-form-item>
     </el-form>

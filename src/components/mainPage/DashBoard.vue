@@ -34,7 +34,7 @@ import {useUserStore} from "@/stores/useUserStore";
 import {ElNotification} from "element-plus";
 
 const userStore = useUserStore();
-const email = userStore.email;
+const Email = userStore.Email;
 const categoryStore = useCategoryStore();
 const emit = defineEmits(['categorySelected', 'ifAll']);
 const showAddRssWindow = ref(false);
@@ -56,7 +56,7 @@ const handleAddRss = (formData: {rss_name: string, rss_address: string }) => {
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ action: 'addRss',email:email,rss_name:newName,rss_address:newAddress})})
+    body: JSON.stringify({ action: 'addRss',email:Email,rss_name:newName,rss_address:newAddress})})
       .then(response => response.json())
       .then(data =>{
         if (data.success === '500') {

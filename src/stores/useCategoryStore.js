@@ -60,17 +60,32 @@ export const useCategoryStore = defineStore('category', {
                 });
             });
         },
-        // getArticleIsReaded(link) {
-        //     for (const category of Object.values(this.userCategories)) {
-        //         const targetItem = category.items.find(item => item.cardLink === link);
-        //         if (targetItem) return targetItem.isReaded;
-        //     }
-        //     return false;
-        // },
         setLoadedStatus(status){
             this.HasLoaded = status
+        },
+        clearUserCategories(){
+            this.UserCategories = {}
+            this.NextCategoryId = 1
+            this.HasLoaded = false
+        },
+        // filterReadItems是用来过滤出 IsReaded 为 true 的项，为保存数据做准备
+        filterReadItems() {
+            const filteredCategories = {};
+            // 遍历 UserCategories
+            Object.keys(this.UserCategories).forEach(categoryId => {
+                const category = this.UserCategories[categoryId];
+                // 过滤 Items 中 IsReaded 为 true 的项
+                const readItems = category.Items.filter(item => item.IsReaded === true).map(item => item.Link);
+                // 如果有 IsReaded 为 true 的项，则添加到新的对象中
+                if (readItems.length > 0) {
+                    filteredCategories[categoryId] = {
+                        ...category,
+                        Items: readItems
+                    };
+                }
+            });
+            return filteredCategories;
         }
-
     },
     getters: {
         fullCategories(state) {
